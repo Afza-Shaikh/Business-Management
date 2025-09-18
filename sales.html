@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">Sales Report</h1>
+<form method="get" class="box">
+	<div class="columns">
+		<div class="column">
+			<label class="label">Start Date</label>
+			<input class="input" type="date" name="start" value="{{ start.strftime('%Y-%m-%d') if start else '' }}">
+		</div>
+		<div class="column">
+			<label class="label">End Date</label>
+			<input class="input" type="date" name="end" value="{{ end.strftime('%Y-%m-%d') if end else '' }}">
+		</div>
+		<div class="column">
+			<label class="label">&nbsp;</label>
+			<button class="button is-link" type="submit">Filter</button>
+		</div>
+	</div>
+</form>
+<div class="notification is-info">
+	<strong>Total Sales:</strong> {{ 'Rs ' ~ '%.0f'|format(total_sales) }}
+</div>
+{% endblock %}

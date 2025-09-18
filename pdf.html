@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<style>
+		body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; }
+		.header { display: flex; justify-content: space-between; align-items: center; }
+		.logo { font-weight: bold; font-size: 20px; color: #1f2937; }
+		.subtitle { color:#4b5563; font-size:12px; }
+		.title { font-size: 18px; }
+		.meta { width: 100%; margin-top: 10px; }
+		.meta td { padding: 4px 6px; vertical-align: top; }
+		table.items { width: 100%; border-collapse: collapse; margin-top: 12px; }
+		table.items th, table.items td { border: 1px solid #999; padding: 6px; }
+		table.items th { background: #f3f4f6; }
+		.right { text-align: right; }
+		.signature { margin-top: 40px; text-align: right; }
+		.brand { border:2px solid #1f2937; padding:6px 10px; display:inline-block; }
+	</style>
+</head>
+<body>
+	<div class="header">
+		<div>
+			<div class="logo brand">TS Distributor</div>
+			<div class="subtitle">Dairy Products Distribution, Karachi, Pakistan</div>
+		</div>
+		<div class="title">General Sales Invoice</div>
+	</div>
+	<table class="meta">
+		<tr>
+			<td>
+				<strong>Invoice No:</strong> {{ invoice.invoice_number }}<br>
+				<strong>Invoice Date:</strong> {{ invoice.date.strftime('%Y-%m-%d') }}<br>
+				<strong>Dispatch Type:</strong> {{ invoice.dispatch_type or '' }}<br>
+				<strong>Payment Terms:</strong> {{ invoice.payment_terms or '' }}<br>
+				<strong>Ref/PO No:</strong> {{ invoice.ref_po_no or '' }}
+			</td>
+			<td>
+				<strong>Customer:</strong> {{ invoice.customer.name if invoice.customer else '' }}<br>
+				<strong>Tel:</strong> {{ invoice.customer_tel or '' }}<br>
+				<strong>Address:</strong> {{ invoice.customer_address or '' }}<br>
+				<strong>Account:</strong> {{ invoice.account or '' }}
+			</td>
+			<td>
+				<strong>On Behalf Of:</strong> {{ invoice.on_behalf_of or '' }}<br>
+				<strong>Contact Person:</strong> {{ invoice.contact_person or '' }}<br>
+				<strong>Contact No:</strong> {{ invoice.contact_number or '' }}<br>
+				<strong>Due Date:</strong> {{ invoice.due_date.strftime('%Y-%m-%d') if invoice.due_date else '' }}
+			</td>
+			<td>
+				<strong>Customer NTN:</strong> {{ invoice.customer_ntn or '' }}<br>
+				<strong>Customer STRN:</strong> {{ invoice.customer_strn or '' }}
+			</td>
+		</tr>
+	</table>
+
+	<table class="items">
+		<thead>
+			<tr>
+				<th>S.No</th>
+				<th>Date</th>
+				<th>Description of Goods</th>
+				<th>UOM</th>
+				<th class="right">Qty</th>
+				<th class="right">Rate</th>
+				<th class="right">Amount</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for it in invoice.items %}
+			<tr>
+				<td>{{ loop.index }}</td>
+				<td>{{ invoice.date.strftime('%Y-%m-%d') }}</td>
+				<td>{{ it.product.name if it.product else '' }}{% if it.sub_type %} → {{ it.sub_type }}{% endif %}</td>
+				<td>{{ it.uom or 'KG' }}</td>
+				<td class="right">{{ '%.2f'|format(it.quantity) }}</td>
+				<td class="right">{{ '%.2f'|format(it.unit_price) }}</td>
+				<td class="right">{{ '%.2f'|format(it.total) }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<table class="meta" style="margin-top:12px;">
+		<tr>
+			<td></td><td></td><td class="right"><strong>Sub Total</strong></td><td class="right">{{ '%.2f'|format(invoice.subtotal or 0) }}</td>
+		</tr>
+		<tr>
+			<td></td><td></td><td class="right"><strong>Trade Discount</strong></td><td class="right">{{ '%.2f'|format(invoice.discount or 0) }}</td>
+		</tr>
+		<tr>
+			<td></td><td></td><td class="right"><strong>GST ({{ '%.2f'|format(invoice.gst_rate or 0) }}%)</strong></td><td class="right">{{ '%.2f'|format(invoice.gst_amount or 0) }}</td>
+		</tr>
+		<tr>
+			<td></td><td></td><td class="right"><strong>Grand Total</strong></td><td class="right"><strong>{{ '%.2f'|format(invoice.grand_total or 0) }}</strong></td>
+		</tr>
+		<tr>
+			<td colspan="4"><strong>Amount in Words:</strong> {{ invoice.amount_in_words or '' }}</td>
+		</tr>
+	</table>
+
+	<div class="signature">
+		<div>For <strong>TS Distributor</strong></div>
+		<br><br>
+		<div>Authorized Signatory</div>
+	</div>
+</body>
+</html>
+

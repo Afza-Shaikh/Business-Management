@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+	<h1 class="h4 m-0">Record Payment</h1>
+	<a href="{{ url_for('billing.outstanding_dashboard') }}" class="btn btn-outline-secondary">
+		<i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+	</a>
+</div>
+
+<div class="row">
+	<div class="col-12 col-lg-8">
+		<div class="card">
+			<div class="card-header">
+				<h5 class="mb-0">Payment Details</h5>
+			</div>
+			<div class="card-body">
+				<form method="post" id="paymentForm">
+					<div class="row g-3">
+						<!-- Customer Selection -->
+						<div class="col-12">
+							<label class="form-label">Customer <span class="text-danger">*</span></label>
+							<select class="form-select" name="customer_id" id="customerSelect" required>
+								<option value="">Select Customer</option>
+								{% for customer in customers %}
+								<option value="{{ customer.id }}" {{ 'selected' if request.args.get('customer_id')|int == customer.id else '' }}>
+									{{ customer.name }} {% if customer.phone %}({{ customer.phone }}){% endif %}
+								</option>
+								{% endfor %}
+							</select>
+						</div>
+
+						<!-- Outstanding Invoices -->
+						<div class="col-12" id="invoicesSection" style="display: none;">
+							<label class="form-label">Outstanding Invoices</label>
+							<div id="invoicesList" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+								<div class="text-center text-muted">
+									<i class="fa-solid fa-spinner fa-spin"></i> Loading invoices...
+								</div>
+							</div>
+							<div class="form-text">Select one or more invoices to apply payment to.</div>
+						</div>
+
+						<!-- Payment Amount -->
+						<div class="col-12 col-md-6">
+							<label class="form-label">Payment Amount <span class="text-danger">*</span></label>
+							<div class="input-group">
+								<span class="input-group-text">Rs</span>
+								<input type="number" step="0.01" min="0" class="form-control" name="payment_amount" id="paymentAmount" required>
+							</div>
+							<div class="form-text">Maximum: <span id="maxAmount">0.00</span></div>
+						</div>
+
+						<!-- Payment Method -->
+						<div class="col-12 col-md-6">
+							<label class="form-label">Payment Method <span class="text-danger">*</span></label>
+							<select class="form-select" name="payment_method" required>
+								<option value="">Select Method</option>
+								<option value="Cash">Cash</option>
+								<option value="Bank Transfer">Bank Transfer</option>
+								<option value="Cheque">Cheque</option>
+								<option value="Digital Wallet">Digital Wallet</option>
+							</select>
+						</div>
+
+						<!-- Reference Number -->
+						<div class="col-12 col-md-6">
+							<label class="form-label">Reference Number</label>
+							<input type="text" class="form-control" name="reference_number" placeholder="Optional">
+						</div>
+
+						<!-- Payment Date -->
+						<div class="col-12 col-md-6">
+							<label class="form-label">Payment Date</label>
+							<input type="date" class="form-control" name="payment_date" value="{{ today }}">
+						</div>
+
+						<!-- Notes -->
+						<div class="col-12">
+							<label class="form-label">Notes/Description</label>
+							<textarea class="form-control" name="notes" rows="3" placeholder="Optional notes about this payment"></textarea>
+						</div>
+
+						<!-- Submit Button -->
+						<div class="col-12">
+							<button type="submit" class="btn btn-success" id="submitBtn" disabled>
+								<i class="fa-solid fa-check me-1"></i> Record Payment
+							</button>
+							<a href="{{ url_for('billing.outstanding_dashboard') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-12 col-lg-4">
+		<div class="card">
+			<div class="card-header">
+				<h5 class="mb-0">Payment Summary</h5>
+			</div>
+			<div class="card-body">
+				<div id="paymentSummary">
+					<div class="text-center text-muted">
+						<i class="fa-solid fa-info-circle"></i><br>
+						Select a customer to view payment summary
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="card mt-3">
+			<div class="card-header">
+				<h5 class="mb-0">Quick Actions</h5>
+			</div>
+			<div class="card-body">
+				<div class="d-grid gap-2">
+					<a href="{{ url_for('billing.payment_history') }}" class="btn btn-outline-primary">
+						<i class="fa-solid fa-history me-1"></i> View Payment History
+					</a>
+					<a href="{{ url_for('billing.customer_report') }}" class="btn btn-outline-info">
+						<i class="fa-solid fa-chart-line me-1"></i> Customer Reports
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const customerSelect = document.getElementById('customerSelect');
+	const invoicesSection = document.getElementById('invoicesSection');
+	const invoicesList = document.getElementById('invoicesList');
+	const paymentAmount = document.getElementById('paymentAmount');
+	const maxAmountSpan = document.getElementById('maxAmount');
+	const submitBtn = document.getElementById('submitBtn');
+	const paymentSummary = document.getElementById('paymentSummary');
+
+	let selectedInvoices = [];
+	let totalOutstanding = 0;
+
+	// Customer selection handler
+	customerSelect.addEventListener('change', function() {
+		const customerId = this.value;
+		
+		if (customerId) {
+			loadCustomerInvoices(customerId);
+		} else {
+			invoicesSection.style.display = 'none';
+			paymentSummary.innerHTML = '<div class="text-center text-muted"><i class="fa-solid fa-info-circle"></i><br>Select a customer to view payment summary</div>';
+			submitBtn.disabled = true;
+		}
+	});
+
+	// Load customer invoices
+	function loadCustomerInvoices(customerId) {
+		invoicesSection.style.display = 'block';
+		invoicesList.innerHTML = '<div class="text-center text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading invoices...</div>';
+		
+		fetch(`/billing/get-customer-invoices/${customerId}`)
+			.then(response => response.json())
+			.then(data => {
+				selectedInvoices = [];
+				totalOutstanding = 0;
+				
+				if (data.length === 0) {
+					invoicesList.innerHTML = '<div class="text-center text-muted"><i class="fa-solid fa-check-circle text-success"></i><br>No outstanding invoices</div>';
+					updatePaymentSummary();
+					return;
+				}
+				
+				let html = '';
+				data.forEach(invoice => {
+					totalOutstanding += invoice.outstanding;
+					html += `
+						<div class="form-check mb-2">
+							<input class="form-check-input invoice-checkbox" type="checkbox" value="${invoice.id}" id="invoice_${invoice.id}">
+							<label class="form-check-label" for="invoice_${invoice.id}">
+								<div class="d-flex justify-content-between">
+									<div>
+										<strong>${invoice.invoice_number}</strong>
+										<small class="text-muted d-block">${invoice.date}</small>
+									</div>
+									<div class="text-end">
+										<div class="fw-bold">Rs ${invoice.outstanding.toLocaleString()}</div>
+										<small class="text-muted">Outstanding</small>
+									</div>
+								</div>
+							</label>
+						</div>
+					`;
+				});
+				
+				invoicesList.innerHTML = html;
+				maxAmountSpan.textContent = totalOutstanding.toLocaleString();
+				updatePaymentSummary();
+				
+				// Add event listeners to checkboxes
+				document.querySelectorAll('.invoice-checkbox').forEach(checkbox => {
+					checkbox.addEventListener('change', updateSelectedInvoices);
+				});
+			})
+			.catch(error => {
+				console.error('Error loading invoices:', error);
+				invoicesList.innerHTML = '<div class="text-center text-danger"><i class="fa-solid fa-exclamation-triangle"></i><br>Error loading invoices</div>';
+			});
+	}
+
+	// Update selected invoices
+	function updateSelectedInvoices() {
+		selectedInvoices = [];
+		const checkboxes = document.querySelectorAll('.invoice-checkbox:checked');
+		
+		checkboxes.forEach(checkbox => {
+			selectedInvoices.push(parseInt(checkbox.value));
+		});
+		
+		updatePaymentSummary();
+	}
+
+	// Update payment summary
+	function updatePaymentSummary() {
+		if (selectedInvoices.length === 0) {
+			paymentSummary.innerHTML = '<div class="text-center text-muted"><i class="fa-solid fa-info-circle"></i><br>Select invoices to view summary</div>';
+			submitBtn.disabled = true;
+			return;
+		}
+		
+		const selectedAmount = selectedInvoices.reduce((sum, invoiceId) => {
+			const checkbox = document.getElementById(`invoice_${invoiceId}`);
+			const label = checkbox.nextElementSibling;
+			const amountText = label.querySelector('.fw-bold').textContent;
+			return sum + parseFloat(amountText.replace('Rs ', '').replace(/,/g, ''));
+		}, 0);
+		
+		paymentSummary.innerHTML = `
+			<div class="mb-2">
+				<strong>Selected Invoices:</strong> ${selectedInvoices.length}
+			</div>
+			<div class="mb-2">
+				<strong>Total Outstanding:</strong> Rs ${selectedAmount.toLocaleString()}
+			</div>
+			<div class="mb-2">
+				<strong>Payment Amount:</strong> 
+				<span id="enteredAmount">0.00</span>
+			</div>
+			<div class="alert alert-info mb-0">
+				<small>
+					<i class="fa-solid fa-info-circle"></i>
+					Payment will be distributed proportionally across selected invoices.
+				</small>
+			</div>
+		`;
+		
+		submitBtn.disabled = false;
+	}
+
+	// Payment amount change handler
+	paymentAmount.addEventListener('input', function() {
+		const amount = parseFloat(this.value) || 0;
+		const enteredAmountSpan = document.getElementById('enteredAmount');
+		
+		if (enteredAmountSpan) {
+			enteredAmountSpan.textContent = amount.toLocaleString();
+		}
+		
+		if (amount > totalOutstanding) {
+			this.setCustomValidity(`Amount cannot exceed total outstanding (Rs ${totalOutstanding.toLocaleString()})`);
+		} else {
+			this.setCustomValidity('');
+		}
+	});
+
+	// Form submission
+	document.getElementById('paymentForm').addEventListener('submit', function(e) {
+		if (selectedInvoices.length === 0) {
+			e.preventDefault();
+			alert('Please select at least one invoice.');
+			return;
+		}
+		
+		// Add selected invoice IDs to form
+		selectedInvoices.forEach(invoiceId => {
+			const input = document.createElement('input');
+			input.type = 'hidden';
+			input.name = 'invoice_ids';
+			input.value = invoiceId;
+			this.appendChild(input);
+		});
+	});
+});
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+	<h1 class="h4 m-0">Invoice {{ invoice.invoice_number }}</h1>
+	<a class="btn btn-outline-primary" href="/invoices/{{ invoice.id }}/pdf"><i class="fa-solid fa-file-pdf me-1"></i> Download PDF</a>
+</div>
+<div class="row g-3 mb-3">
+	<div class="col-12 col-md-4">
+		<div class="card">
+			<div class="card-body">
+				<div class="d-flex justify-content-between"><span class="text-muted">Grand Total</span><strong>{{ 'Rs ' ~ '%.0f'|format(invoice.grand_total) }}</strong></div>
+				<div class="d-flex justify-content-between"><span class="text-muted">Paid</span><strong>{{ 'Rs ' ~ '%.0f'|format(paid) }}</strong></div>
+				<div class="d-flex justify-content-between"><span class="text-muted">Outstanding</span><strong class="{{ 'text-success' if outstanding<=0 else ('text-warning' if paid>0 else 'text-danger') }}">{{ 'Rs ' ~ '%.0f'|format(outstanding) }}</strong></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 col-md-8">
+		<div class="card">
+			<div class="card-body">
+				<form method="post" action="/invoices/{{ invoice.id }}/record-payment" class="row g-2 align-items-end">
+					<div class="col-12 col-md-3">
+						<label class="form-label">Payment Date</label>
+						<input type="date" name="date" class="form-control" value="{{ (invoice.date.strftime('%Y-%m-%d')) }}">
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="form-label">Method</label>
+						<select name="method" class="form-select" required>
+							<option value="">Select</option>
+							<option>Cash</option>
+							<option>Bank Transfer</option>
+							<option>Cheque</option>
+						</select>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="form-label">Amount Received</label>
+						<input type="number" step="0.01" min="0" max="{{ outstanding }}" name="amount" class="form-control" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="form-label">Notes</label>
+						<input type="text" name="notes" class="form-control" placeholder="Optional">
+					</div>
+					<div class="col-12">
+						<button class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Record Payment</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<p>Date: {{ invoice.date.strftime('%Y-%m-%d') }}</p>
+<p>Customer: {{ invoice.customer.name if invoice.customer else '' }}</p>
+<div class="columns">
+	<div class="column is-half">
+		<p><strong>Dispatch Type:</strong> {{ invoice.dispatch_type or '' }}</p>
+		<p><strong>Payment Terms:</strong> {{ invoice.payment_terms or '' }}</p>
+		<p><strong>Ref/PO No:</strong> {{ invoice.ref_po_no or '' }}</p>
+		<p><strong>Due Date:</strong> {{ invoice.due_date.strftime('%Y-%m-%d') if invoice.due_date else '' }}</p>
+	</div>
+	<div class="column is-half">
+		<p><strong>Customer NTN:</strong> {{ invoice.customer_ntn or '' }}</p>
+		<p><strong>Customer STRN:</strong> {{ invoice.customer_strn or '' }}</p>
+		<p><strong>Contact Person:</strong> {{ invoice.contact_person or '' }}</p>
+		<p><strong>Contact Number:</strong> {{ invoice.contact_number or '' }}</p>
+	</div>
+</div>
+<table class="table table-striped align-middle">
+    <thead class="table-light">
+        <tr><th>S.No</th><th>Date</th><th>Description</th><th>UOM</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+    </thead>
+    <tbody>
+		{% for it in invoice.items %}
+		<tr>
+			<td>{{ loop.index }}</td>
+			<td>{{ invoice.date.strftime('%Y-%m-%d') }}</td>
+			<td>{{ it.product.name if it.product else '' }}{% if it.sub_type %} → {{ it.sub_type }}{% endif %}</td>
+			<td>{{ it.uom or 'KG' }}</td>
+			<td>{{ it.quantity }}</td>
+			<td>{{ it.unit_price }}</td>
+			<td>{{ it.total }}</td>
+		</tr>
+		{% endfor %}
+        <tr><td colspan="6" class="text-end"><strong>Sub Total</strong></td><td>{{ invoice.subtotal or 0 }}</td></tr>
+        <tr><td colspan="6" class="text-end"><strong>Trade Discount</strong></td><td>{{ invoice.discount or 0 }}</td></tr>
+        <tr><td colspan="6" class="text-end"><strong>GST ({{ invoice.gst_rate or 0 }}%)</strong></td><td>{{ invoice.gst_amount or 0 }}</td></tr>
+        <tr><td colspan="6" class="text-end"><strong>Grand Total</strong></td><td><strong>{{ invoice.grand_total }}</strong></td></tr>
+		<tr><td colspan="7"><strong>Amount in Words:</strong> {{ invoice.amount_in_words or '' }}</td></tr>
+	</tbody>
+</table>
+{% if invoice.payments %}
+<div class="card mt-3">
+	<div class="card-header">Payments</div>
+	<div class="table-responsive">
+		<table class="table table-sm mb-0">
+			<thead class="table-light"><tr><th>Date</th><th>Method</th><th>Amount</th><th>Notes</th></tr></thead>
+			<tbody>
+				{% for p in invoice.payments %}
+				<tr>
+					<td>{{ p.date.strftime('%Y-%m-%d') }}</td>
+					<td>{{ p.method }}</td>
+					<td>{{ 'Rs ' ~ '%.0f'|format(p.amount) }}</td>
+					<td>{{ p.notes or '' }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,37 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1 class="title">Add Stock</h1>
-<form method="post">
+<h1 class="title">Add Customer</h1>
+<form method="post" class="box">
 	<div class="field">
-		<label class="label">Product → Sub-Type</label>
-		<div class="control">
-			<div class="select is-fullwidth">
-				<select name="stock_item_id" required>
-					<option value="">Select a product</option>
-					{% if not grouped %}
-					<option disabled>No products found. Please add stock first.</option>
-					{% else %}
-						{% for pname, options in grouped.items() %}
-						<optgroup label="{{ pname }}">
-							{% for sid, label in options %}
-							<option value="{{ sid }}">{{ label }}</option>
-							{% endfor %}
-						</optgroup>
-						{% endfor %}
-					{% endif %}
-				</select>
-			</div>
-		</div>
+		<label class="label">Name</label>
+		<div class="control"><input class="input" name="name" required></div>
 	</div>
 	<div class="field">
-		<label class="label">Quantity</label>
-		<div class="control"><input class="input" type="number" step="0.01" name="quantity" required></div>
+		<label class="label">Phone</label>
+		<div class="control"><input class="input" name="phone"></div>
 	</div>
 	<div class="field">
-		<label class="label">Unit Price (Rs)</label>
-		<div class="control"><input class="input" type="number" step="0.01" name="unit_price" required></div>
+		<label class="label">Email</label>
+		<div class="control"><input class="input" type="email" name="email"></div>
 	</div>
-	<button class="button is-primary" type="submit">Save</button>
-	<a class="button" href="/stock">Cancel</a>
+	<div class="field">
+		<label class="label">Address</label>
+		<div class="control"><input class="input" name="address"></div>
+	</div>
+	<div class="field">
+		<label class="label">Notes</label>
+		<div class="control"><textarea class="textarea" name="notes"></textarea></div>
+	</div>
+	<div class="field is-grouped">
+		<div class="control"><button class="button is-primary" type="submit">Save</button></div>
+		<div class="control"><a class="button" href="/customers">Cancel</a></div>
+	</div>
 </form>
 {% endblock %}

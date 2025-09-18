@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">Create Invoice</h1>
+<form method="post">
+	<div class="columns box">
+		<div class="column is-half">
+			<div class="field">
+				<label class="label">Customer</label>
+				<div class="control">
+					<div class="select is-fullwidth">
+						<select name="customer_id" required>
+							<option value="">-- Select Customer --</option>
+							{% for c in customers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="field"><label class="label">Customer Tel</label><input class="input" name="customer_tel"></div>
+			<div class="field"><label class="label">Customer Address</label><input class="input" name="customer_address"></div>
+			<div class="field"><label class="label">Account</label><input class="input" name="account"></div>
+			<div class="field"><label class="label">On Behalf Of</label><input class="input" name="on_behalf_of"></div>
+			<div class="field"><label class="label">Contact Person</label><input class="input" name="contact_person"></div>
+			<div class="field"><label class="label">Contact Number</label><input class="input" name="contact_number"></div>
+		</div>
+		<div class="column is-half">
+			<div class="field"><label class="label">Dispatch Type</label><input class="input" name="dispatch_type"></div>
+			<div class="field"><label class="label">Payment Terms</label><input class="input" name="payment_terms"></div>
+			<div class="field"><label class="label">Ref/PO No</label><input class="input" name="ref_po_no"></div>
+			<div class="field"><label class="label">Invoice Due Date</label><input class="input" type="date" name="due_date"></div>
+			<div class="field"><label class="label">Customer NTN</label><input class="input" name="customer_ntn"></div>
+			<div class="field"><label class="label">Customer STRN</label><input class="input" name="customer_strn"></div>
+		</div>
+	</div>
+
+	<table class="table is-fullwidth is-striped" id="items">
+		<thead>
+			<tr><th>S.No</th><th>Product → Sub-Type</th><th>UOM</th><th>Qty</th><th>Rate</th><th>Tax</th><th>Amount</th><th></th></tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+	<input type="hidden" name="rows" id="rows" value="0">
+	<button class="button is-link" type="button" id="add_row">Add Item</button>
+	<hr>
+	<div class="columns">
+		<div class="column is-half"></div>
+		<div class="column is-half">
+			<div class="field"><label class="label">Trade Discount</label><input class="input" type="number" step="0.01" name="discount" value="0"></div>
+			<div class="field"><label class="label">GST Rate (%)</label><input class="input" type="number" step="0.01" name="gst_rate" value="0"></div>
+		</div>
+	</div>
+	<button class="button is-primary" type="submit">Create</button>
+</form>
+<script>
+const GROUPED = {{ grouped|tojson }};
+let rowCount = 0;
+function buildOptions(){
+	let html = '<option value="">-- Select --</option>';
+	Object.keys(GROUPED).forEach(group => {
+		html += `<optgroup label="${group}">`;
+		GROUPED[group].forEach(([id, label]) => { html += `<option value="${id}">${label}</option>`; });
+		html += `</optgroup>`;
+	});
+	return html;
+}
+function addRow() {
+	const tbody = document.querySelector('#items tbody');
+	const tr = document.createElement('tr');
+	tr.innerHTML = `
+		<td class="sno"></td>
+		<td><div class="select is-fullwidth"><select name="stock_item_id_${rowCount}" class="sid">${buildOptions()}</select></div></td>
+		<td><input class="input uom" name="uom_${rowCount}" value="KG"></td>
+		<td><input class="input qty" name="quantity_${rowCount}" type="number" step="0.01" value="1"></td>
+		<td><input class="input up" name="unit_price_${rowCount}" type="number" step="0.01" value="0"></td>
+		<td><input class="input tax" name="tax_${rowCount}" type="number" step="0.01" value="0"></td>
+		<td class="line_total">0</td>
+		<td><button class="button is-small is-danger del" type="button">X</button></td>
+	`;
+	tbody.appendChild(tr);
+	document.getElementById('rows').value = ++rowCount;
+	renumber();
+	bindRow(tr);
+}
+function bindRow(tr) {
+	const qty = tr.querySelector('input.qty');
+	const up = tr.querySelector('input.up');
+	const tax = tr.querySelector('input.tax');
+	const line = tr.querySelector('.line_total');
+	function recalc(){
+		const q = parseFloat(qty.value||0);
+		const u = parseFloat(up.value||0);
+		const t = parseFloat(tax.value||0);
+		line.textContent = (q*u + t).toFixed(2);
+	}
+	[qty, up, tax].forEach(el => el.addEventListener('input', recalc));
+	recalc();
+	tr.querySelector('.del').addEventListener('click', () => { tr.remove(); renumber(); });
+}
+function renumber(){
+	document.querySelectorAll('#items tbody tr .sno').forEach((el, idx)=>{ el.textContent = idx+1; });
+}
+document.getElementById('add_row').addEventListener('click', addRow);
+addRow();
+</script>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+	<h1 class="h3 m-0">Dashboard</h1>
+	<span class="badge text-bg-warning badge-accent">Live</span>
+</div>
+
+<div class="row g-3 mb-4">
+	<div class="col-12 col-md-4">
+		<div class="card card-kpi">
+			<div class="card-body">
+				<p class="text-muted mb-1">Total Outstanding</p>
+				<h3 class="m-0">{{ 'Rs ' ~ '%.0f'|format(total_outstanding or 0) }}</h3>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 col-md-4">
+		<div class="card card-kpi">
+			<div class="card-body">
+				<p class="text-muted mb-1">Monthly Outstanding</p>
+				<h3 class="m-0">{{ 'Rs ' ~ '%.0f'|format(monthly_outstanding or 0) }}</h3>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 col-md-4">
+		<div class="card card-kpi">
+			<div class="card-body">
+				<p class="text-muted mb-1">Total Payments Received (This Month)</p>
+				<h3 class="m-0">{{ 'Rs ' ~ '%.0f'|format(total_payments or 0) }}</h3>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row g-3 mb-4">
+	<div class="col-12 col-md-4">
+		<div class="card card-kpi">
+			<div class="card-body">
+				<div class="d-flex align-items-center">
+					<div class="flex-shrink-0">
+						<i class="fa-solid fa-exclamation-triangle text-danger fa-2x"></i>
+					</div>
+					<div class="flex-grow-1 ms-3">
+						<p class="text-muted mb-1">Overdue Invoices</p>
+						<h3 class="m-0">{{ overdue_invoices or 0 }}</h3>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 col-md-4">
+		<div class="card card-kpi">
+			<div class="card-body">
+				<div class="d-flex align-items-center">
+					<div class="flex-shrink-0">
+						<i class="fa-solid fa-credit-card text-primary fa-2x"></i>
+					</div>
+					<div class="flex-grow-1 ms-3">
+						<p class="text-muted mb-1">Billing & Payments</p>
+						<a href="/billing" class="btn btn-sm btn-outline-primary">Manage</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 col-md-4">
+		<div class="card card-kpi">
+			<div class="card-body">
+				<div class="d-flex align-items-center">
+					<div class="flex-shrink-0">
+						<i class="fa-solid fa-chart-line text-info fa-2x"></i>
+					</div>
+					<div class="flex-grow-1 ms-3">
+						<p class="text-muted mb-1">Quick Actions</p>
+						<a href="/billing/record-payment" class="btn btn-sm btn-outline-success">Record Payment</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row g-3 mb-4">
+	<div class="col-12 col-lg-6">
+		<div class="card h-100">
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<span>Sales Trend</span>
+				<span class="text-muted small">Last 30 days</span>
+			</div>
+			<div class="card-body"><canvas id="salesTrendChart" height="120"></canvas></div>
+		</div>
+	</div>
+	<div class="col-12 col-lg-6">
+		<div class="card h-100">
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<span>Profit & Loss</span>
+				<span class="text-muted small">This Month</span>
+			</div>
+			<div class="card-body"><canvas id="plPieChart" height="120"></canvas></div>
+		</div>
+	</div>
+</div>
+
+<div class="row g-3">
+	<div class="col-12 col-lg-6">
+		<div class="card">
+			<div class="card-header">Recent Invoices</div>
+			<div class="table-responsive">
+				<table class="table table-hover align-middle datatable">
+					<thead class="table-light">
+						<tr><th>#</th><th>Date</th><th>Customer</th><th>Total</th></tr>
+					</thead>
+					<tbody>
+						{% for inv in recent_invoices %}
+						<tr>
+							<td><a href="/invoices/{{ inv.id }}">{{ inv.invoice_number }}</a></td>
+							<td>{{ inv.date.strftime('%Y-%m-%d') }}</td>
+							<td>{{ inv.customer.name if inv.customer else '' }}</td>
+							<td>{{ 'Rs ' ~ '%.0f'|format(inv.grand_total) }}</td>
+						</tr>
+						{% else %}
+						<tr><td colspan="4" class="text-center text-muted">No invoices yet.</td></tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 col-lg-6">
+		<div class="card">
+			<div class="card-header">Low Stock Alerts</div>
+			<div class="table-responsive">
+				<table class="table table-hover align-middle">
+					<thead class="table-light">
+						<tr><th>Product</th><th>Sub-Type</th><th>Qty</th></tr>
+					</thead>
+					<tbody>
+						{% for s in low_stock %}
+						<tr class="table-warning">
+							<td>{{ s.product.name }}</td>
+							<td>{{ s.sub_type or '-' }}</td>
+							<td>{{ '%.2f'|format(s.quantity) }}</td>
+						</tr>
+						{% else %}
+						<tr><td colspan="3" class="text-center text-muted">No low stock items.</td></tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+	// Demo charts with static placeholders; data can be wired later
+	const trendCtx = document.getElementById('salesTrendChart');
+	if(trendCtx && window.Chart){
+		new Chart(trendCtx, {
+			type: 'line',
+			data: { labels: Array.from({length: 12}, (_,i)=>`W${i+1}`), datasets: [{ label:'Sales', data: Array.from({length:12}, ()=> Math.floor(Math.random()*100)+20), borderColor:'#1E3A8A', backgroundColor:'rgba(30,58,138,.1)', tension:.35, fill:true }] },
+			options: { plugins:{ legend:{ display:false } }, scales: { y: { beginAtZero: true } } }
+		});
+	}
+	const plCtx = document.getElementById('plPieChart');
+	if(plCtx && window.Chart){
+		new Chart(plCtx, {
+			type: 'doughnut',
+			data: { labels:['Revenue','Expenses','Net'], datasets:[{ data:[60, 35, 25], backgroundColor:['#22c55e', '#ef4444', '#f59e0b'] }] },
+			options: { plugins:{ legend:{ position:'bottom' } } }
+		});
+	}
+});
+</script>
+{% endblock %}
