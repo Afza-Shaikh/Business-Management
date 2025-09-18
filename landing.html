@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>TS Distributor - Business Management System</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+	<style>
+		:root{
+			--primary:#1E3A8A; /* Deep Blue */
+			--accent:#f59e0b; /* Amber */
+		}
+		html[data-theme="dark"]{
+			--bs-body-bg:#0b1220;
+			--bs-body-color:#e5e7eb;
+		}
+		body { min-height: 100vh; }
+		.hero-section {
+			background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+			color: white;
+			padding: 100px 0;
+		}
+		.feature-card {
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+			border: none;
+			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+		}
+		.feature-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+		}
+		.navbar-brand {
+			font-weight: 700;
+			font-size: 1.5rem;
+		}
+		.btn-primary {
+			background-color: var(--primary);
+			border-color: var(--primary);
+		}
+		.btn-primary:hover {
+			background-color: #1e40af;
+			border-color: #1e40af;
+		}
+		.btn-outline-primary {
+			color: var(--primary);
+			border-color: var(--primary);
+		}
+		.btn-outline-primary:hover {
+			background-color: var(--primary);
+			border-color: var(--primary);
+		}
+		.footer {
+			background-color: #1f2937;
+			color: #e5e7eb;
+		}
+	</style>
+</head>
+<body>
+	<!-- Navigation -->
+	<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+		<div class="container">
+			<a class="navbar-brand d-flex align-items-center" href="#">
+				<i class="fa-solid fa-cubes-stacked text-warning me-2"></i>
+				<span>TS Distributor</span>
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="#features">Features</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#about">About</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#contact">Contact</a>
+					</li>
+					<li class="nav-item">
+						<a class="btn btn-outline-primary ms-2" href="/login">Login</a>
+					</li>
+					<li class="nav-item">
+						<a class="btn btn-primary ms-2" href="/dashboard">Dashboard</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Hero Section -->
+	<section class="hero-section">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col-lg-6">
+					<h1 class="display-4 fw-bold mb-4">Welcome to TS Distributor</h1>
+					<p class="lead mb-4">Professional Business Management System for Modern Distributors</p>
+					<p class="mb-4">Streamline your inventory, sales, billing, and financial operations with our comprehensive ERP solution designed specifically for distribution businesses.</p>
+					<div class="d-flex gap-3">
+						<a href="/dashboard" class="btn btn-light btn-lg">
+							<i class="fa-solid fa-chart-line me-2"></i>Get Started
+						</a>
+						<a href="#features" class="btn btn-outline-light btn-lg">
+							<i class="fa-solid fa-info-circle me-2"></i>Learn More
+						</a>
+					</div>
+				</div>
+				<div class="col-lg-6 text-center">
+					<i class="fa-solid fa-chart-pie fa-10x opacity-75"></i>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Features Section -->
+	<section id="features" class="py-5">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 mx-auto text-center mb-5">
+					<h2 class="display-5 fw-bold mb-3">Powerful Features</h2>
+					<p class="lead text-muted">Everything you need to manage your distribution business efficiently</p>
+				</div>
+			</div>
+			<div class="row g-4">
+				<div class="col-md-6 col-lg-4">
+					<div class="card feature-card h-100">
+						<div class="card-body text-center p-4">
+							<i class="fa-solid fa-boxes-stacked fa-3x text-primary mb-3"></i>
+							<h5 class="card-title">Inventory Management</h5>
+							<p class="card-text">Track stock levels, manage products, and monitor inventory movements with real-time updates.</p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4">
+					<div class="card feature-card h-100">
+						<div class="card-body text-center p-4">
+							<i class="fa-solid fa-file-invoice fa-3x text-success mb-3"></i>
+							<h5 class="card-title">Sales & Invoicing</h5>
+							<p class="card-text">Create professional invoices, manage sales orders, and track customer transactions seamlessly.</p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4">
+					<div class="card feature-card h-100">
+						<div class="card-body text-center p-4">
+							<i class="fa-solid fa-credit-card fa-3x text-warning mb-3"></i>
+							<h5 class="card-title">Billing & Payments</h5>
+							<p class="card-text">Manage outstanding balances, record payments, and track customer payment history efficiently.</p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4">
+					<div class="card feature-card h-100">
+						<div class="card-body text-center p-4">
+							<i class="fa-solid fa-users fa-3x text-info mb-3"></i>
+							<h5 class="card-title">Customer Management</h5>
+							<p class="card-text">Maintain comprehensive customer profiles and track interaction history for better relationships.</p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4">
+					<div class="card feature-card h-100">
+						<div class="card-body text-center p-4">
+							<i class="fa-solid fa-receipt fa-3x text-danger mb-3"></i>
+							<h5 class="card-title">Financial Ledger</h5>
+							<p class="card-text">Keep accurate financial records with automated double-entry bookkeeping and reporting.</p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4">
+					<div class="card feature-card h-100">
+						<div class="card-body text-center p-4">
+							<i class="fa-solid fa-chart-line fa-3x text-secondary mb-3"></i>
+							<h5 class="card-title">Reports & Analytics</h5>
+							<p class="card-text">Generate detailed reports and gain insights into your business performance with interactive charts.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- About Section -->
+	<section id="about" class="py-5 bg-light">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col-lg-6">
+					<h2 class="display-5 fw-bold mb-4">About TS Distributor</h2>
+					<p class="lead mb-4">Built for modern distribution businesses that need reliable, scalable, and user-friendly management solutions.</p>
+					<div class="row g-3">
+						<div class="col-6">
+							<div class="d-flex align-items-center">
+								<i class="fa-solid fa-check-circle text-success me-2"></i>
+								<span>Real-time Updates</span>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="d-flex align-items-center">
+								<i class="fa-solid fa-check-circle text-success me-2"></i>
+								<span>Mobile Responsive</span>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="d-flex align-items-center">
+								<i class="fa-solid fa-check-circle text-success me-2"></i>
+								<span>Secure & Reliable</span>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="d-flex align-items-center">
+								<i class="fa-solid fa-check-circle text-success me-2"></i>
+								<span>Easy to Use</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 text-center">
+					<i class="fa-solid fa-building fa-8x text-muted"></i>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Contact Section -->
+	<section id="contact" class="py-5">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 mx-auto text-center">
+					<h2 class="display-5 fw-bold mb-3">Get Started Today</h2>
+					<p class="lead text-muted mb-4">Ready to streamline your distribution business? Access the system now.</p>
+					<div class="d-flex gap-3 justify-content-center">
+						<a href="/dashboard" class="btn btn-primary btn-lg">
+							<i class="fa-solid fa-rocket me-2"></i>Access Dashboard
+						</a>
+						<a href="/login" class="btn btn-outline-primary btn-lg">
+							<i class="fa-solid fa-sign-in-alt me-2"></i>Login
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Footer -->
+	<footer class="footer py-4">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col-md-6">
+					<div class="d-flex align-items-center">
+						<i class="fa-solid fa-cubes-stacked text-warning me-2"></i>
+						<span class="fw-bold">TS Distributor</span>
+					</div>
+					<p class="mb-0 mt-2 text-muted">Professional Business Management System</p>
+				</div>
+				<div class="col-md-6 text-md-end">
+					<p class="mb-0 text-muted">&copy; 2024 TS Distributor. All rights reserved.</p>
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		// Smooth scrolling for anchor links
+		document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+			anchor.addEventListener('click', function (e) {
+				e.preventDefault();
+				const target = document.querySelector(this.getAttribute('href'));
+				if (target) {
+					target.scrollIntoView({
+						behavior: 'smooth',
+						block: 'start'
+					});
+				}
+			});
+		});
+	</script>
+</body>
+</html>
+
+

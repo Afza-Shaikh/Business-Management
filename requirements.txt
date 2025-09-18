@@ -1,0 +1,12 @@
+Flask==3.0.3
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.32
+Werkzeug==3.0.3
+itsdangerous==2.2.0
+Jinja2==3.1.4
+click==8.1.7
+xhtml2pdf==0.2.16
+reportlab==4.2.5
+pytz==2024.1
+Flask-Migrate==4.0.7

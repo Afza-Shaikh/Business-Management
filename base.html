@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>TS Distributor - Business Manager</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+	<style>
+		:root{
+			--primary:#1E3A8A; /* Deep Blue */
+			--accent:#f59e0b; /* Amber */
+		}
+		html[data-theme="dark"]{
+			--bs-body-bg:#0b1220;
+			--bs-body-color:#e5e7eb;
+		}
+		body { min-height: 100vh; }
+		.app-layout{ display:grid; grid-template-columns: 260px 1fr; min-height:100vh; }
+		.app-sidebar{ background: #111827; color:#e5e7eb; }
+		.app-sidebar .brand{ color:#fff; font-weight:700; letter-spacing:.3px; }
+		.app-sidebar a{ color:#cbd5e1; text-decoration:none; display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; margin:6px 10px; transition: all .2s ease; }
+		.app-sidebar a:hover, .app-sidebar a.active{ background:#1f2937; color:#fff; }
+		.app-topbar{ background: #0f172a; color:#fff; }
+		.app-topbar .navbar-brand{ color:#fff; }
+		.app-content{ padding: 24px; }
+		.badge-accent{ background:var(--accent); }
+		.card-kpi{ border:0; box-shadow: 0 8px 22px rgba(0,0,0,.08); }
+		@media(max-width: 992px){ .app-layout{ grid-template-columns: 1fr; } .app-sidebar{ position: sticky; top:0; z-index:1030; } }
+	</style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+	<div class="app-layout">
+		<aside class="app-sidebar p-3">
+			<div class="d-flex align-items-center justify-content-between mb-3">
+				<div class="brand d-flex align-items-center gap-2">
+					<i class="fa-solid fa-cubes-stacked text-warning"></i>
+					<span>TS Distributor</span>
+				</div>
+				<button class="btn btn-outline-light btn-sm" id="themeToggle" title="Toggle theme">
+					<i class="fa-solid fa-moon"></i>
+				</button>
+			</div>
+			<nav class="nav flex-column">
+				<a href="/dashboard" class="nav-link {{ 'active' if request.path=='/dashboard' else '' }}"><i class="fa-solid fa-gauge"></i><span>Dashboard</span></a>
+				<a href="/stock" class="nav-link {{ 'active' if request.path.startswith('/stock') else '' }}"><i class="fa-solid fa-boxes-stacked"></i><span>Inventory</span></a>
+				<a href="/invoices/create" class="nav-link {{ 'active' if request.path.startswith('/invoices') else '' }}"><i class="fa-solid fa-file-invoice"></i><span>Sales</span></a>
+				
+				<!-- Billing & Payments Dropdown -->
+				<div class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle {{ 'active' if request.path.startswith('/billing') else '' }}" href="#" data-bs-toggle="dropdown">
+						<i class="fa-solid fa-credit-card"></i><span>Billing & Payments</span>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/billing"><i class="fa-solid fa-dashboard me-2"></i>Outstanding Dashboard</a></li>
+						<li><a class="dropdown-item" href="/billing/record-payment"><i class="fa-solid fa-plus me-2"></i>Record Payment</a></li>
+						<li><a class="dropdown-item" href="/billing/payment-history"><i class="fa-solid fa-history me-2"></i>Payment History</a></li>
+						<li><a class="dropdown-item" href="/billing/customer-report"><i class="fa-solid fa-chart-line me-2"></i>Customer Report</a></li>
+					</ul>
+				</div>
+				
+				<a href="/customers" class="nav-link {{ 'active' if request.path.startswith('/customers') else '' }}"><i class="fa-solid fa-user"></i><span>Customers</span></a>
+				<a href="/ledger" class="nav-link {{ 'active' if request.path.startswith('/ledger') else '' }}"><i class="fa-solid fa-receipt"></i><span>Finance</span></a>
+				<a href="/reports/stock-movement" class="nav-link {{ 'active' if request.path.startswith('/reports') else '' }}"><i class="fa-solid fa-chart-line"></i><span>Reports</span></a>
+				<a href="/logout" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+			</nav>
+		</aside>
+		<main class="d-flex flex-column">
+			<nav class="navbar app-topbar">
+				<div class="container-fluid">
+					<a class="navbar-brand" href="#">
+						<img src="https://dummyimage.com/28x28/1E3A8A/fff&text=TS" alt="logo" class="rounded me-2"/>
+						<span>Business Manager</span>
+					</a>
+					<div class="d-flex align-items-center gap-3">
+						<div class="dropdown">
+							<button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+								<i class="fa-regular fa-user"></i> Account
+							</button>
+							<ul class="dropdown-menu dropdown-menu-end">
+								<li><a class="dropdown-item" href="#">Settings</a></li>
+								<li><a class="dropdown-item" href="/logout">Logout</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</nav>
+			<section class="app-content container-fluid">
+				{% with messages = get_flashed_messages(with_categories=true) %}
+					{% if messages %}
+						{% for category, message in messages %}
+							<div class="alert alert-{{ 'warning' if category=='warning' else category }} alert-dismissible fade show" role="alert">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endif %}
+				{% endwith %}
+				{% block content %}{% endblock %}
+			</section>
+		</main>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+	<script>
+		(function(){
+			const key='tsbm-theme';
+			const saved=localStorage.getItem(key);
+			if(saved){ document.documentElement.setAttribute('data-theme', saved); }
+			document.getElementById('themeToggle')?.addEventListener('click', function(){
+				const current=document.documentElement.getAttribute('data-theme')||'light';
+				const next=current==='light'?'dark':'light';
+				document.documentElement.setAttribute('data-theme', next);
+				localStorage.setItem(key, next);
+			});
+			// Auto-enhance any table with .datatable
+			$(function(){
+				$('.datatable').each(function(){
+					$(this).DataTable({ pageLength: 10, lengthChange: false });
+				});
+			});
+		})();
+	</script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
