@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">Edit Stock</h1>
+<form method="post">
+	<div class="field">
+		<label class="label">Product</label>
+		<div class="control">
+			<input class="input" value="{{ item.product.name }}" disabled>
+		</div>
+	</div>
+
+	<div class="field" id="subtype_field">
+		<label class="label">Sub-Type</label>
+		<div class="control">
+			<div class="select is-fullwidth">
+				<select name="sub_type" id="sub_type">
+					<option value="">-- Select Sub-Type --</option>
+				</select>
+			</div>
+		</div>
+	</div>
+
+	<div class="field">
+		<label class="label">Quantity</label>
+		<div class="control"><input class="input" type="number" step="0.01" name="quantity" required value="{{ '%.2f'|format(item.quantity) }}"></div>
+	</div>
+	<div class="field">
+		<label class="label">Unit Price (Rs)</label>
+		<div class="control"><input class="input" type="number" step="0.01" name="unit_price" required value="{{ '%.2f'|format(item.unit_price) }}"></div>
+	</div>
+	<button class="button is-primary" type="submit">Save</button>
+	<a class="button" href="/stock">Cancel</a>
+</form>
+<script>
+const BUTTER_SUBTYPES = {{ BUTTER_SUBTYPES|tojson }};
+const DESI_GHEE_SUBTYPES = {{ DESI_GHEE_SUBTYPES|tojson }};
+const productName = '{{ item.product.name|lower }}';
+const subtypeSelect = document.getElementById('sub_type');
+const current = {{ (item.sub_type or '')|tojson }};
+let list = [];
+if (productName === 'butter') list = BUTTER_SUBTYPES;
+if (productName === 'desi ghee') list = DESI_GHEE_SUBTYPES;
+subtypeSelect.innerHTML = '<option value="">-- Select Sub-Type --</option>';
+list.forEach(s => {
+	const opt = document.createElement('option');
+	opt.value = s; opt.textContent = s; if (s === current) opt.selected = true; subtypeSelect.appendChild(opt);
+});
+if (!list.length) { document.getElementById('subtype_field').style.display = 'none'; }
+</script>
+{% endblock %}

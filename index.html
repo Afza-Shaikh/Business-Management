@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+	<h1 class="h3 m-0">Inventory</h1>
+	<div class="d-flex gap-2">
+		<a class="btn btn-primary" href="/stock/add"><i class="fa-solid fa-plus me-1"></i> Add Stock</a>
+		<a class="btn btn-outline-secondary" href="/stock/history"><i class="fa-solid fa-clock-rotate-left me-1"></i> History</a>
+	</div>
+</div>
+
+<div class="card mb-3">
+	<div class="card-body">
+		<div class="row g-2">
+			<div class="col-12 col-md-4">
+				<input type="text" class="form-control" placeholder="Search products..." id="inventorySearch">
+			</div>
+			<div class="col-6 col-md-3">
+				<select class="form-select" id="filterCategory">
+					<option value="">All Categories</option>
+					<option value="Electrical">Electrical</option>
+					<option value="Hardware">Hardware</option>
+				</select>
+			</div>
+			<div class="col-6 col-md-3">
+				<select class="form-select" id="filterSubtype">
+					<option value="">All Sub-Types</option>
+				</select>
+			</div>
+			<div class="col-12 col-md-2">
+				<div class="form-check">
+					<input class="form-check-input" type="checkbox" value="1" id="lowStockOnly">
+					<label class="form-check-label" for="lowStockOnly">Low stock only</label>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% for product, items in stock_map.items() %}
+<div class="card mb-4">
+	<div class="card-header d-flex justify-content-between align-items-center">
+		<span class="fw-semibold">{{ product.name }}</span>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped align-middle datatable">
+			<thead class="table-light">
+				<tr><th>Sub-Type</th><th>Quantity</th><th>Unit</th><th>Unit Price</th><th class="text-end">Actions</th></tr>
+			</thead>
+			<tbody>
+				{% for item in items %}
+				<tr>
+					<td>{{ item.sub_type or '-' }}</td>
+					<td class="{{ 'text-danger fw-bold' if item.quantity <= 10 else '' }}">{{ '%.2f'|format(item.quantity) }}</td>
+					<td>{{ item.unit }}</td>
+					<td>{{ 'Rs ' ~ '%.0f'|format(item.unit_price) }}</td>
+					<td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/stock/edit/{{ item.id }}"><i class="fa-solid fa-pen"></i> Edit</a></td>
+				</tr>
+				{% else %}
+				<tr><td colspan="5" class="text-center text-muted">No stock entries.</td></tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+	const search = document.getElementById('inventorySearch');
+	if(search){
+		search.addEventListener('input', function(){
+			// Let DataTables handle filtering; hook available if per-group tables needed
+		});
+	}
+});
+</script>
+{% endblock %}

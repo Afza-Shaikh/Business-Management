@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">Add Stock</h1>
+<form method="post">
+	<div class="field">
+		<label class="label">Product → Sub-Type</label>
+		<div class="control">
+			<div class="select is-fullwidth">
+				<select name="stock_item_id" required>
+					<option value="">Select a product</option>
+					{% if not grouped %}
+					<option disabled>No products found. Please add stock first.</option>
+					{% else %}
+						{% for pname, options in grouped.items() %}
+						<optgroup label="{{ pname }}">
+							{% for sid, label in options %}
+							<option value="{{ sid }}">{{ label }}</option>
+							{% endfor %}
+						</optgroup>
+						{% endfor %}
+					{% endif %}
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class="field">
+		<label class="label">Quantity</label>
+		<div class="control"><input class="input" type="number" step="0.01" name="quantity" required></div>
+	</div>
+	<div class="field">
+		<label class="label">Unit Price (Rs)</label>
+		<div class="control"><input class="input" type="number" step="0.01" name="unit_price" required></div>
+	</div>
+	<button class="button is-primary" type="submit">Save</button>
+	<a class="button" href="/stock">Cancel</a>
+</form>
+{% endblock %}

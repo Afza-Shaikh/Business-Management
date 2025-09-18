@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="title">Stock History</h1>
+<form method="get" class="box">
+	<div class="columns">
+		<div class="column">
+			<label class="label">Start</label>
+			<input class="input" type="datetime-local" name="start" value="{{ request.args.get('start', '') }}">
+		</div>
+		<div class="column">
+			<label class="label">End</label>
+			<input class="input" type="datetime-local" name="end" value="{{ request.args.get('end', '') }}">
+		</div>
+		<div class="column">
+			<label class="label">Action</label>
+			<div class="select is-fullwidth">
+				<select name="action">
+					<option value="">All</option>
+					<option value="Add" {{ 'selected' if request.args.get('action')=='Add' else '' }}>Add</option>
+					<option value="Deducted on Invoice" {{ 'selected' if request.args.get('action')=='Deducted on Invoice' else '' }}>Deducted on Invoice</option>
+					<option value="Price Updated" {{ 'selected' if request.args.get('action')=='Price Updated' else '' }}>Price Updated</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class="field">
+		<button class="button is-link" type="submit">Filter</button>
+	</div>
+</form>
+<table class="table is-fullwidth is-striped">
+	<thead>
+		<tr><th>Date</th><th>Product</th><th>Sub-Type</th><th>Action</th><th>Qty</th><th>Old Price</th><th>New Price</th><th>By</th></tr>
+	</thead>
+	<tbody>
+		{% for h in history %}
+		<tr>
+			<td>{{ h.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+			<td>{{ h.product.name if h.product else '' }}</td>
+			<td>{{ h.sub_type or '-' }}</td>
+			<td>{{ h.action }}</td>
+			<td>{{ h.quantity or '' }}</td>
+			<td>{{ h.old_price if h.old_price is not none else '' }}</td>
+			<td>{{ h.new_price if h.new_price is not none else '' }}</td>
+			<td>{{ h.performed_by or '' }}</td>
+		</tr>
+		{% else %}
+		<tr><td colspan="8" class="has-text-centered has-text-grey">No history.</td></tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
